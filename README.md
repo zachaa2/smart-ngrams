@@ -19,8 +19,13 @@ smart-ngrams/
 ├── ngrams.cpp                      # Original C++ implementation (reference)
 │
 ├── cmd/
-│   └── cli/
-│       └── main.go                 # CLI entry point (local testing)
+│   └── cli/                        # CLI entry point for local testing (package main)
+│       ├── main.go                 # Arg parsing and orchestration
+│       ├── file.go                 # File reading and per-file processing
+│       ├── display.go              # Stdout formatting (stats, ranked counts)
+│       ├── file_test.go            # Unit tests for file.go
+│       ├── display_test.go         # Unit tests for display.go
+│       └── data/                   # Sample text files for local testing
 │
 ├── internal/
 │   └── ngrams/                     # Core NLP library (package ngrams)
@@ -55,6 +60,9 @@ go test ./internal/ngrams/ -v -run TestTokenize
 go test ./internal/ngrams/ -v -run TestHandleQuotes
 go test ./internal/ngrams/ -v -run TestCountWords
 go test ./internal/ngrams/ -v -run TestCountNGrams
+go test ./cmd/cli/ -v -run TestProcessFile
+go test ./cmd/cli/ -v -run TestDisplayCounts
+go test ./cmd/cli/ -v -run TestPrintStats
 ```
 
 Show test coverage:
@@ -65,5 +73,11 @@ go test ./... -cover
 ## Running the CLI
 
 ```bash
-go run ./cmd/cli/
+go run ./cmd/cli/ <file1> <file2> ...
+```
+
+Example using the included sample files:
+```bash
+go run ./cmd/cli/ cmd/cli/data/lion.txt
+go run ./cmd/cli/ cmd/cli/data/lion.txt cmd/cli/data/kira.txt
 ```
