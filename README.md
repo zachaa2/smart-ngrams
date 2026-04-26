@@ -34,6 +34,18 @@ smart-ngrams/
 │       ├── tokenize_test.go        # Unit tests for tokenize.go
 │       ├── count.go                # N-gram counting logic
 │       └── count_test.go           # Unit tests for count.go
+│
+├── wasm/
+│   └── main.go                     # Go WASM entry point — exports functions to JS
+│
+└── frontend/                       # Vite vanilla JS SPA
+    ├── index.html
+    ├── src/
+    │   ├── main.js                 # Loads WASM and wires up the UI
+    │   └── style.css
+    └── public/
+        ├── main.wasm               # Compiled Go WASM binary (see build instructions)
+        └── wasm_exec.js            # Go JS bridge (from Go stdlib)
 ```
 
 ## Running Unit Tests
@@ -68,6 +80,27 @@ go test ./cmd/cli/ -v -run TestPrintStats
 Show test coverage:
 ```bash
 go test ./... -cover
+```
+
+## Building the WASM Binary
+
+The `main.wasm` binary is not committed to the repo. Build it from the project root before running the frontend:
+
+```bash
+GOOS=js GOARCH=wasm go build -o frontend/public/main.wasm ./wasm/
+```
+
+If you need to refresh `wasm_exec.js` (e.g. after a Go version upgrade):
+```bash
+cp $(go env GOROOT)/lib/wasm/wasm_exec.js frontend/public/
+```
+
+## Running the Frontend
+
+```bash
+cd frontend
+npm install   # first time only
+npm run dev   # starts Vite dev server
 ```
 
 ## Running the CLI
