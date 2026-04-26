@@ -7,6 +7,8 @@ import (
 	"github.com/zachaa2/smart-ngrams/internal/ngrams"
 )
 
+// readFile reads the entire contents of filename and returns it as a string.
+// Prints an error to stderr and returns an empty string if the file cannot be accessed.
 func readFile(filename string) string {
 	content, err := os.ReadFile(filename)
 	if err != nil {
@@ -16,7 +18,10 @@ func readFile(filename string) string {
 	return string(content)
 }
 
-func ProcessFile(filename string,
+// processFile reads filename, tokenizes its contents, and accumulates word and
+// n-gram (2–5) frequencies into the provided count maps. Returns true if the
+// file was valid and processed, false otherwise.
+func processFile(filename string,
 	wordCounts map[string]int,
 	bigramCounts map[string]int,
 	trigramCounts map[string]int,

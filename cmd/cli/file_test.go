@@ -28,7 +28,7 @@ func TestReadFile_MissingFile(t *testing.T) {
 // --- ProcessFile tests ---
 
 func TestProcessFile_ReturnsFalseForMissingFile(t *testing.T) {
-	result := ProcessFile("data/does_not_exist.txt",
+	result := processFile("data/does_not_exist.txt",
 		map[string]int{}, map[string]int{}, map[string]int{}, map[string]int{}, map[string]int{})
 	if result {
 		t.Error("expected false for missing file")
@@ -36,7 +36,7 @@ func TestProcessFile_ReturnsFalseForMissingFile(t *testing.T) {
 }
 
 func TestProcessFile_ReturnsFalseForEmptyFile(t *testing.T) {
-	result := ProcessFile("data/empty.txt",
+	result := processFile("data/empty.txt",
 		map[string]int{}, map[string]int{}, map[string]int{}, map[string]int{}, map[string]int{})
 	if result {
 		t.Error("expected false for empty file")
@@ -44,7 +44,7 @@ func TestProcessFile_ReturnsFalseForEmptyFile(t *testing.T) {
 }
 
 func TestProcessFile_ReturnsTrueForValidFile(t *testing.T) {
-	result := ProcessFile("data/lion.txt",
+	result := processFile("data/lion.txt",
 		map[string]int{}, map[string]int{}, map[string]int{}, map[string]int{}, map[string]int{})
 	if !result {
 		t.Error("expected true for valid file lion.txt")
@@ -53,7 +53,7 @@ func TestProcessFile_ReturnsTrueForValidFile(t *testing.T) {
 
 func TestProcessFile_PopulatesWordCounts(t *testing.T) {
 	wordCounts := map[string]int{}
-	ProcessFile("data/lion.txt", wordCounts,
+	processFile("data/lion.txt", wordCounts,
 		map[string]int{}, map[string]int{}, map[string]int{}, map[string]int{})
 	if len(wordCounts) == 0 {
 		t.Error("expected word counts to be populated")
@@ -62,7 +62,7 @@ func TestProcessFile_PopulatesWordCounts(t *testing.T) {
 
 func TestProcessFile_PopulatesBigramCounts(t *testing.T) {
 	bigramCounts := map[string]int{}
-	ProcessFile("data/lion.txt", map[string]int{}, bigramCounts,
+	processFile("data/lion.txt", map[string]int{}, bigramCounts,
 		map[string]int{}, map[string]int{}, map[string]int{})
 	if len(bigramCounts) == 0 {
 		t.Error("expected bigram counts to be populated")
@@ -72,7 +72,7 @@ func TestProcessFile_PopulatesBigramCounts(t *testing.T) {
 func TestProcessFile_NgramsDoNotSpanStopWords(t *testing.T) {
 	// "the" is a stop word — any bigram spanning it should not exist
 	bigramCounts := map[string]int{}
-	ProcessFile("data/lion.txt", map[string]int{}, bigramCounts,
+	processFile("data/lion.txt", map[string]int{}, bigramCounts,
 		map[string]int{}, map[string]int{}, map[string]int{})
 	for bigram := range bigramCounts {
 		for _, stop := range []string{" the ", " of ", " and ", " in "} {
@@ -99,10 +99,10 @@ func TestProcessFile_AccumulatesAcrossMultipleCalls(t *testing.T) {
 	fourgramCounts := map[string]int{}
 	fivegramCounts := map[string]int{}
 
-	ProcessFile("data/lion.txt", wordCounts, bigramCounts, trigramCounts, fourgramCounts, fivegramCounts)
+	processFile("data/lion.txt", wordCounts, bigramCounts, trigramCounts, fourgramCounts, fivegramCounts)
 	firstTotal := len(wordCounts)
 
-	ProcessFile("data/kira.txt", wordCounts, bigramCounts, trigramCounts, fourgramCounts, fivegramCounts)
+	processFile("data/kira.txt", wordCounts, bigramCounts, trigramCounts, fourgramCounts, fivegramCounts)
 	secondTotal := len(wordCounts)
 
 	if secondTotal <= firstTotal {
