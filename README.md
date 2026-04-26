@@ -27,7 +27,8 @@ smart-ngrams/
 │       ├── stopwords.go            # AP89 stop word list and lookup helper
 │       ├── tokenize.go             # Segmentation and tokenization logic
 │       ├── tokenize_test.go        # Unit tests for tokenize.go
-│       └── count.go                # N-gram counting logic (in progress)
+│       ├── count.go                # N-gram counting logic
+│       └── count_test.go           # Unit tests for count.go
 ```
 
 ## Running Unit Tests
@@ -52,6 +53,8 @@ Run a specific test or group of tests by name pattern:
 go test ./internal/ngrams/ -v -run TestSegmentText
 go test ./internal/ngrams/ -v -run TestTokenize
 go test ./internal/ngrams/ -v -run TestHandleQuotes
+go test ./internal/ngrams/ -v -run TestCountWords
+go test ./internal/ngrams/ -v -run TestCountNGrams
 ```
 
 Show test coverage:
