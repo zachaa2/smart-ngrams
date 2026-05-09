@@ -2,17 +2,50 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- pico.css stylesheet -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
-    >
+    > 
+    <!-- custom stylesheet -->
+    <link rel="stylesheet" href="/src/style.css" />
+    <!-- lucide icons -->
+     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="icon" type="image/svg+xml" href="/braces.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Algorithm</title>
   </head>
   <body>
+    <!-- same header in other pages -->
+    <header style="margin: 1em;">
+      <nav>
+        <ul>
+          <li><a href="/index.html" class="contrast">Smart Ngrams</a></li>
+          <li><a href="/algorithm.html" class="contrast">Algorithm</a></li>
+        </ul>
+      </nav>
+    </header>
+    <!-- main content -->
     <main class="container">
       <h1>Algorithm: TODO</h1>
     </main>
+    <!-- same footer in other pages -->
+    <footer>
+      <nav>
+        <ul>
+          <li>
+            <a href="https://github.com/zachaa2/smart-ngrams" target="_blank">
+              <i data-lucide="code-2" style="margin-right: 8px;"></i>Source
+            </a>
+          </li>
+          <li>
+            <a href="https://zachaa2.github.io/" target="_blank">
+              <i data-lucide="globe" style="margin-right: 8px;"></i>Website
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </footer>
+    <script>lucide.createIcons()</script>
   </body>
 </html>
