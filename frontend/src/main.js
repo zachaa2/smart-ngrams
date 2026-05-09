@@ -29,8 +29,86 @@ function addLevelRow(n, topN) {
     document.getElementById("levels").appendChild(row);
 }
 
-// init rows
+async function initWasm() {
+    const go = new Go();
+    const result = await WebAssembly.instantiateStreaming(fetch("/main.wasm"), go.importObject);
+    go.run(result.instance);
+    // enable run btn
+    document.getElementById("run-btn").disabled = false;
+}
+
+/** @returns LevelConfig[] */
+function collectLevelRows() {
+    return Array.from(
+        document.querySelectorAll(".level-row")).map(
+            row => ({
+                n: parseInt(row.querySelector(".n-input").value),
+                topN: parseInt(row.querySelector(".topn-input").value),
+            })
+        );
+}
+
+/**
+ * Render results table for specific ngram
+ * @param {number} n 
+ * @param {number} topN
+ * @param {NgramEntry[]} entries
+ * @param {NgramStats} stats
+ * @returns {HTMLElement}
+ */
+function renderResultTable(n, topN, entries, stats) {
+    const slicedData = entries.slice(0, topN);
+    const label = n === 1 ? "Words" : `${n}-grams`;
+
+    const details = document.createElement("details");
+    details.open = false;
+    details.innerHTML = `
+        <summary>${label} - total: ${stats.total}, unique: ${stats.unique}</summary>
+        <table>
+            <thead>
+                <tr><th>#</th><th>n-gram</th><th>count</th></tr>
+            </thead>
+            <tbody>
+                ${slicedData.map((entry, i) => {
+                    return `<tr><td>${i + 1}</td><td>${entry.ngram}</td><td>${entry.count}</td></tr>`;
+                }).join("")}
+            </tbody>
+        </table>
+    `
+    return details;
+}
+
+/**
+ * Render all results tables for all ngram levels
+ * @param {NgramResult} result 
+ * @param {LevelConfig} levels 
+ */
+function renderResults(result, levels) {
+    const container = document.getElementById("results");
+    container.innerHTML = ""; //clear old results
+    
+    levels.forEach(({ n, topN }) => {
+        const entries = result.result[String(n)] ?? []
+        const stats = result.stats[String(n)] ?? { total: 0, unique: 0 }
+        container.appendChild(renderResultTable(n, topN, entries, stats))
+    })
+}
+
+// event listener for the run btn
+document.getElementById("run-btn").addEventListener("click", () => {
+    const text = document.getElementById("input-textarea").value;
+    const levels = collectLevelRows();
+    const ns = levels.map(l => l.n);
+    
+    /** @type {NgramResult} */
+    const result = JSON.parse(computeNgrams(text, JSON.stringify(ns)));
+    renderResults(result, levels)
+});
+
+
+// INIT
+initWasm();
+
+// rows
 DEFAULT_LEVELS.forEach(level => addLevelRow(level.n, level.topN))
 document.getElementById("add-level-btn").addEventListener("click", () => addLevelRow(1, 10));
-
-// TODO: add wasm integration
