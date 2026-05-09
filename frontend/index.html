@@ -6,7 +6,7 @@
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
-    >
+    />
     <!-- custom stylesheet -->
     <link rel="stylesheet" href="/src/style.css" />
     <!-- lucide icons -->
@@ -17,7 +17,7 @@
   </head>
   <body>
     <!-- same header in other pages -->
-    <header style="margin: 1em;">
+    <header style="margin: 1em">
       <nav>
         <ul>
           <li><a href="/index.html" class="contrast">Smart Ngrams</a></li>
@@ -26,8 +26,36 @@
       </nav>
     </header>
     <!-- main content -->
-    <main>
-      <textarea id="input" placeholder="Enter text here..." rows="10"></textarea>
+    <main class="container">
+      <!-- ngrams input -->
+      <section id="input-section">
+        <h2>Input Text</h2>
+        <textarea
+          id="input-textarea"
+          placeholder="Paste your text here..."
+          rows="10"
+        ></textarea>
+      </section>
+      <!-- ngrams settings -->
+      <section id="settings-section">
+        <h2>Configure Levels</h2>  
+        <div id="levels">
+          <!-- levels rows rendered by JS -->
+        </div>
+      </section>
+      <!-- buttons -->
+       <div class="btn-row">
+        <button id="add-level-btn" class="secondary outline">
+          <i data-lucide="plus"></i>Add Level
+        </button>
+        <button id="run-btn" disabled>Analyze</button>
+       </div>
+      <!-- results -->
+      <section id="results-section">
+        <div id="results">
+          <!-- results rendered by JS -->
+        </div>
+      </section>
     </main>
     <!-- same footer in other pages -->
     <footer>
@@ -35,12 +63,12 @@
         <ul>
           <li>
             <a href="https://github.com/zachaa2/smart-ngrams" target="_blank">
-              <i data-lucide="code-2" style="margin-right: 8px;"></i>Source
+              <i data-lucide="code-2"></i>Source
             </a>
           </li>
           <li>
             <a href="https://zachaa2.github.io/" target="_blank">
-              <i data-lucide="globe" style="margin-right: 8px;"></i>Website
+              <i data-lucide="globe"></i>Website
             </a>
           </li>
         </ul>
@@ -48,6 +76,8 @@
     </footer>
     <script src="/wasm_exec.js"></script>
     <script type="module" src="/src/main.js"></script>
-    <script>lucide.createIcons()</script>
+    <script>
+      lucide.createIcons();
+    </script>
   </body>
 </html>
