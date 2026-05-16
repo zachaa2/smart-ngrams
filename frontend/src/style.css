@@ -49,3 +49,15 @@ footer svg,
     flex-direction: row;
     justify-content: space-between;
 }
+
+.results-section {
+    padding-top: 48px;
+}
+
+.result-table-head {
+    position: -webkit-sticky; /* Safari support */
+    position: sticky;
+    top: 0;
+    z-index: 2; /* Ensures header stays above scrolling body content */
+    background-color: #fff; /* Essential: prevents content from showing through */
+}

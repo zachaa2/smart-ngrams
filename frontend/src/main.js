@@ -65,7 +65,7 @@ function renderResultTable(n, topN, entries, stats) {
     details.innerHTML = `
         <summary>${label} - total: ${stats.total}, unique: ${stats.unique}</summary>
         <table>
-            <thead>
+            <thead class="result-table-head">
                 <tr><th>#</th><th>n-gram</th><th>count</th></tr>
             </thead>
             <tbody>
