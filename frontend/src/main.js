@@ -5,11 +5,9 @@
 /** @typedef {{ n: number, topN: number }} LevelConfig */
 
 const DEFAULT_LEVELS = [
-    { n: 1, topN: 128 },
-    { n: 2, topN: 64 },
-    { n: 3, topN: 32 },
-    { n: 4, topN: 16 },
-    { n: 5, topN: 8 },
+    { n: 1, topN: 32 },
+    { n: 2, topN: 16 },
+    { n: 3, topN: 8 },
 ]
 
 /**
