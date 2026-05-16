@@ -7,7 +7,7 @@ export default defineConfig({
         rolldownOptions:  {
             input: {
                 main: resolve(__dirname, "index.html"),
-                algorithm: resolve(__dirname, "src/algorithm.html"),
+                algorithm: resolve(__dirname, "algorithm.html"),
             }
         }
     }
