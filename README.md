@@ -112,6 +112,32 @@ npm install   # first time only
 npm run dev   # starts Vite dev server
 ```
 
+## Frontend Code Formatting
+
+The code formatting is done via js-beautify for html files and prettier for js files.
+Formatting can be done via scripts defined in `frontend/package.json`. 
+The js-beautify config can be found in `frontend/.jsbeautifyrc`, and prettier is just using defaults.
+
+Run formatting from the `frontend/` directory 
+
+**Format HTML**
+
+```bash
+npm run format:html
+```
+
+**Format JS**
+
+```bash
+npm run format:js
+```
+
+**Full Formatting**
+
+```bash
+npm run format
+```
+
 ## Running the CLI
 
 ```bash
