@@ -3,21 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <!-- pico.css stylesheet -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
-    > 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
     <!-- custom stylesheet -->
     <link rel="stylesheet" href="/src/style.css" />
     <!-- lucide icons -->
-     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="icon" type="image/svg+xml" href="/braces.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Algorithm</title>
   </head>
   <body>
     <!-- same header in other pages -->
-    <header style="margin: 1em;">
+    <header style="margin: 1em">
       <nav>
         <ul>
           <li><a href="./index.html" class="contrast">Smart Ngrams</a></li>
@@ -27,7 +24,498 @@
     </header>
     <!-- main content -->
     <main class="container">
-      <h1>Algorithm: TODO</h1>
+      <hgroup>
+        <h1>Algorithm</h1>
+        <p>
+          How
+          <em>smart</em>
+          n-grams are computed from a body of text.
+        </p>
+      </hgroup>
+
+      <!-- Overview -->
+      <section class="algo-section">
+        <h2>Overview</h2>
+        <p>
+          A traditional n-gram extractor produces every contiguous window of
+          <em>n</em>
+          words from a document. The result is dominated by uninteresting phrases stitched together
+          by high-frequency
+          function words such as
+          <em>the</em>
+          ,
+          <em>of</em>
+          , or
+          <em>and</em>
+          . The goal of this project is to extract
+          <strong>&ldquo;interesting&rdquo; n-grams</strong>
+          : contiguous word sequences that do not cross a
+          <strong>stop-word boundary</strong>
+          .
+        </p>
+        <p>The pipeline is built from two stages:</p>
+        <ol>
+          <li>
+            <strong>Tokenization</strong>
+            &mdash; the raw text is normalized and chopped into a list of
+            <em>segments</em>
+            . A segment is a maximal run of valid words containing no stop word. Stop words
+            therefore act as
+            <em>delimiters</em>
+            rather than as members of any n-gram.
+          </li>
+          <li>
+            <strong>Counting</strong>
+            &mdash; unigrams (words) and n-grams of arbitrary order
+            <em>n</em>
+            are tallied per segment. By construction, no n-gram can span a segment boundary, so no
+            n-gram can contain a
+            stop word.
+          </li>
+        </ol>
+
+        <div class="algo-note">
+          <strong>Stop-word list.</strong>
+          The implementation uses the 50&nbsp;most frequent words from the AP89 newswire corpus (
+          <em>the</em>
+          ,
+          <em>of</em>
+          ,
+          <em>to</em>
+          ,
+          <em>a</em>
+          ,
+          <em>and</em>
+          ,
+          <em>in</em>
+          ,
+          <em>said</em>
+          ,
+          <em>for</em>
+          ,
+          <em>that</em>
+          ,
+          <em>was</em>
+          , ...). The set is hard-coded and treated as a constant.
+        </div>
+
+        <p>
+          The remainder of this page presents the algorithm in five self-contained pieces. Each is
+          given as semi-formal
+          pseudocode broken down by the major routines. The actual Go implementation lives in
+          <code>internal/ngrams/</code>
+          .
+        </p>
+      </section>
+
+      <!-- Notation -->
+      <section class="algo-section">
+        <h2>Notation</h2>
+        <ul>
+          <li>
+            <code>T</code>
+            &mdash; the input text, a sequence of Unicode characters.
+          </li>
+          <li>
+            <code>S</code>
+            &mdash; the set of stop words.
+          </li>
+          <li>
+            A
+            <em>segment</em>
+            is a list of words
+            <code>
+              [w
+              <sub>1</sub>
+              , w
+              <sub>2</sub>
+              , ..., w
+              <sub>k</sub>
+              ]
+            </code>
+            with
+            <code>
+              w
+              <sub>i</sub>
+              &notin; S
+            </code>
+            and
+            <code>
+              |w
+              <sub>i</sub>
+              | &gt; 1
+            </code>
+            .
+          </li>
+          <li>
+            <code>segments</code>
+            is a list of such segments produced by tokenization.
+          </li>
+          <li>
+            A
+            <em>word</em>
+            is a maximal run of alphabetic characters, optionally containing single quotes (to
+            preserve contractions
+            such as
+            <em>don&rsquo;t</em>
+            ).
+          </li>
+        </ul>
+      </section>
+
+      <!-- Driver -->
+      <section class="algo-section">
+        <h2>1. Driver</h2>
+        <p>
+          The entry point combines tokenization with one pass per chosen n-gram order. The caller
+          supplies pre-allocated
+          count maps; the algorithms mutate them in place.
+        </p>
+
+        <div class="pseudocode">
+          <div class="pseudocode-title">
+            Algorithm 1:
+            <span class="fn">SmartNgrams</span>
+            (T, N)
+          </div>
+          <pre><span class="cm">// T: input text. N: set of n-gram orders to compute (e.g. {1,2,3}).</span>
+<span class="kw">Input:</span>  text T, orders N &sube; &#8469;
+<span class="kw">Output:</span> a map  n &rarr; (map word &rarr; frequency)  for each n &isin; N
+
+stopCounts &larr; empty map
+segments   &larr; <span class="fn">Tokenize</span>(T, stopCounts)
+
+<span class="kw">for each</span> n <span class="kw">in</span> N <span class="kw">do</span>
+    counts[n] &larr; empty map
+    <span class="kw">if</span> n = 1 <span class="kw">then</span>
+        <span class="fn">CountWords</span>(segments, stopCounts, counts[1])
+    <span class="kw">else</span>
+        <span class="fn">CountNGrams</span>(segments, counts[n], n)
+
+<span class="kw">return</span> counts</pre>
+        </div>
+
+        <p>
+          Note the asymmetry between
+          <em>n = 1</em>
+          and
+          <em>n &ge; 2</em>
+          : unigrams include stop words (because individual words by themselves are still
+          meaningful), whereas n-grams
+          of order two or higher deliberately exclude them.
+        </p>
+      </section>
+
+      <!-- Tokenize -->
+      <section class="algo-section">
+        <h2>2. Tokenization</h2>
+        <p>
+          Tokenization is performed in two passes. The first pass (
+          <code>SegmentText</code>
+          ) scans the raw character stream, builds words, and uses stop words as segment delimiters.
+          The second pass (
+          <code>HandleQuotes</code>
+          ) cleans up apostrophes that survived the first pass.
+        </p>
+
+        <div class="pseudocode">
+          <div class="pseudocode-title">
+            Algorithm 2:
+            <span class="fn">Tokenize</span>
+            (T, stopCounts)
+          </div>
+          <pre>segments &larr; <span class="fn">SegmentText</span>(T, stopCounts)
+tokens   &larr; <span class="fn">HandleQuotes</span>(segments)
+<span class="kw">return</span> tokens</pre>
+        </div>
+
+        <h3>2.1 Character-level segmentation</h3>
+        <p>
+          A single left-to-right scan over
+          <code>T</code>
+          assembles words one character at a time. Any character that is neither a letter nor a
+          single quote terminates
+          the current word. Each finished word is then classified:
+        </p>
+        <ul>
+          <li>
+            If it is a
+            <strong>stop word</strong>
+            &rArr; tally it, close the current segment.
+          </li>
+          <li>
+            If it is a
+            <strong>single letter</strong>
+            &rArr; discard it, close the current segment.
+          </li>
+          <li>Otherwise &rArr; append it to the current segment.</li>
+        </ul>
+
+        <div class="pseudocode">
+          <div class="pseudocode-title">
+            Algorithm 3:
+            <span class="fn">SegmentText</span>
+            (T, stopCounts)
+          </div>
+          <pre>segments       &larr; [ ]
+currentSegment &larr; [ ]
+word           &larr; ""
+
+<span class="kw">procedure</span> <span class="fn">HandleWord</span>():
+    word &larr; <span class="fn">Trim</span>(word, "'")                  <span class="cm">// strip leading/trailing apostrophes</span>
+    <span class="kw">if</span> word &isin; S <span class="kw">then</span>
+        stopCounts[word] &larr; stopCounts[word] + 1
+        <span class="fn">FlushSegment</span>()
+    <span class="kw">else if</span> |word| = 1 <span class="kw">then</span>
+        <span class="fn">FlushSegment</span>()                          <span class="cm">// single letters also delimit</span>
+    <span class="kw">else if</span> |word| &gt; 0 <span class="kw">then</span>
+        append word to currentSegment
+    word &larr; ""
+
+<span class="kw">procedure</span> <span class="fn">FlushSegment</span>():
+    <span class="kw">if</span> currentSegment is non-empty <span class="kw">then</span>
+        append (copy of currentSegment) to segments
+        currentSegment &larr; [ ]
+
+<span class="kw">for each</span> character c <span class="kw">in</span> T <span class="kw">do</span>
+    <span class="kw">if</span> <span class="fn">IsLetter</span>(c) <span class="kw">or</span> c = '\'' <span class="kw">then</span>
+        word &larr; word + <span class="fn">ToLower</span>(c)
+    <span class="kw">else if</span> |word| &gt; 0 <span class="kw">then</span>
+        <span class="fn">HandleWord</span>()
+
+<span class="kw">if</span> |word| &gt; 0 <span class="kw">then</span> <span class="fn">HandleWord</span>()         <span class="cm">// flush trailing word</span>
+<span class="fn">FlushSegment</span>()                                 <span class="cm">// flush trailing segment</span>
+
+<span class="kw">return</span> segments</pre>
+        </div>
+
+        <h3>2.2 Handling internal apostrophes</h3>
+        <p>
+          A single apostrophe inside a word is a legitimate contraction (
+          <em>don&rsquo;t</em>
+          ,
+          <em>it&rsquo;s</em>
+          ) and is preserved. Two or more apostrophes inside the same token, however, almost always
+          indicate quoted text
+          or punctuation noise; they are treated as a hard delimiter. The post-pass below splits
+          such tokens and closes
+          the surrounding segment when the resulting fragment is only a single character.
+        </p>
+
+        <div class="pseudocode">
+          <div class="pseudocode-title">
+            Algorithm 4:
+            <span class="fn">HandleQuotes</span>
+            (segments)
+          </div>
+          <pre>updated &larr; [ ]
+
+<span class="kw">for each</span> segment <span class="kw">in</span> segments <span class="kw">do</span>
+    cur &larr; [ ]
+    <span class="kw">for each</span> word <span class="kw">in</span> segment <span class="kw">do</span>
+        buf      &larr; ""
+        quoteCtr &larr; 0
+        <span class="kw">for each</span> character c <span class="kw">in</span> word <span class="kw">do</span>
+            <span class="kw">if</span> c = '\'' <span class="kw">then</span>
+                quoteCtr &larr; quoteCtr + 1
+                <span class="kw">if</span> quoteCtr &gt; 1 <span class="kw">then</span>           <span class="cm">// second quote =&gt; split</span>
+                    <span class="fn">Emit</span>(buf, cur, updated)
+                    buf &larr; ""; quoteCtr &larr; 0
+                    <span class="kw">continue</span>
+            buf &larr; buf + c
+        <span class="fn">Emit</span>(buf, cur, updated)               <span class="cm">// flush remainder of word</span>
+    <span class="kw">if</span> cur is non-empty <span class="kw">then</span> append cur to updated
+
+<span class="kw">return</span> updated
+
+<span class="kw">procedure</span> <span class="fn">Emit</span>(buf, cur, updated):
+    <span class="kw">if</span> |buf| &gt; 1 <span class="kw">then</span>
+        append buf to cur
+    <span class="kw">else if</span> |buf| = 1 <span class="kw">then</span>           <span class="cm">// single-char fragment delimits</span>
+        <span class="kw">if</span> cur non-empty <span class="kw">then</span>
+            append cur to updated; cur &larr; [ ]</pre>
+        </div>
+
+        <div class="algo-note">
+          <strong>Why two passes?</strong>
+          The first pass is character- oriented and only knows about word boundaries imposed by
+          non-letter characters.
+          Apostrophes need word-level context (&ldquo;how many of them are in this token?&rdquo;) to
+          be classified
+          correctly, which is exactly what the second pass provides.
+        </div>
+      </section>
+
+      <!-- Counting -->
+      <section class="algo-section">
+        <h2>3. Counting</h2>
+
+        <h3>3.1 Unigrams</h3>
+        <p>
+          Unigram counts include every multi-character token, plus the stop-word tallies that were
+          collected during
+          segmentation. Single letters are excluded entirely (they have already been dropped by
+          tokenization).
+        </p>
+
+        <div class="pseudocode">
+          <div class="pseudocode-title">
+            Algorithm 5:
+            <span class="fn">CountWords</span>
+            (segments, stopCounts, wordCounts)
+          </div>
+          <pre><span class="kw">for each</span> (w, c) <span class="kw">in</span> stopCounts <span class="kw">do</span>
+    <span class="kw">if</span> |w| &gt; 1 <span class="kw">then</span>
+        wordCounts[w] &larr; wordCounts[w] + c
+
+<span class="kw">for each</span> segment <span class="kw">in</span> segments <span class="kw">do</span>
+    <span class="kw">for each</span> word <span class="kw">in</span> segment <span class="kw">do</span>
+        wordCounts[word] &larr; wordCounts[word] + 1</pre>
+        </div>
+
+        <h3>3.2 N-grams (n &ge; 2)</h3>
+        <p>
+          For each segment with at least
+          <em>n</em>
+          words, slide a window of width
+          <em>n</em>
+          across it, joining the words with single spaces to form a key. Segments shorter than
+          <em>n</em>
+          are skipped, so this naturally handles e.g. computing 5-grams over a document whose
+          segments are mostly
+          shorter than five words.
+        </p>
+
+        <div class="pseudocode">
+          <div class="pseudocode-title">
+            Algorithm 6:
+            <span class="fn">CountNGrams</span>
+            (segments, nGramCounts, n)
+          </div>
+          <pre><span class="kw">for each</span> segment <span class="kw">in</span> segments <span class="kw">do</span>
+    <span class="kw">if</span> |segment| &lt; n <span class="kw">then</span> <span class="kw">continue</span>
+    <span class="kw">for</span> i &larr; 0 <span class="kw">to</span> |segment| - n <span class="kw">do</span>
+        gram &larr; segment[i]
+        <span class="kw">for</span> j &larr; 1 <span class="kw">to</span> n - 1 <span class="kw">do</span>
+            gram &larr; gram + " " + segment[i + j]
+        nGramCounts[gram] &larr; nGramCounts[gram] + 1</pre>
+        </div>
+      </section>
+
+      <!-- Example -->
+      <section class="algo-section">
+        <h2>4. Worked example</h2>
+        <p>Consider the input</p>
+        <div class="example-block">
+          <code>"The quick brown fox jumps over the lazy dog, and don't stop."</code>
+        </div>
+        <p>
+          After
+          <strong>SegmentText</strong>
+          the stop words
+          <em>the</em>
+          ,
+          <em>over</em>
+          ... wait &mdash;
+          <em>over</em>
+          is
+          <em>not</em>
+          in the AP89 list, but
+          <em>the</em>
+          and
+          <em>and</em>
+          are. Lower-casing and splitting on the stop words {
+          <em>the</em>
+          ,
+          <em>and</em>
+          } produces three segments:
+        </p>
+        <div class="example-block">
+          <code>[ ["quick","brown","fox","jumps","over"], ["lazy","dog"], ["don't","stop"] ]</code>
+        </div>
+        <p>
+          <strong>HandleQuotes</strong>
+          leaves the result unchanged because
+          <em>don&rsquo;t</em>
+          has only a single apostrophe.
+          <strong>CountNGrams</strong>
+          with
+          <code>n = 2</code>
+          yields:
+        </p>
+        <div class="example-block">
+          <code>{ "quick brown":1, "brown fox":1, "fox jumps":1, "jumps over":1, "lazy dog":1,
+            "don't stop":1 }</code>
+        </div>
+        <p>
+          Notice that &ldquo;over the&rdquo; and &ldquo;the lazy&rdquo; &mdash; the bigrams a naive
+          extractor would
+          produce &mdash; are absent: they would have to bridge a stop-word delimiter.
+        </p>
+      </section>
+
+      <!-- Complexity -->
+      <section class="algo-section">
+        <h2>5. Complexity</h2>
+        <p>
+          Let
+          <code>|T|</code>
+          be the number of characters in the input,
+          <code>W</code>
+          the total number of words produced, and
+          <code>
+            n
+            <sub>max</sub>
+          </code>
+          the largest requested n-gram order.
+        </p>
+        <ul>
+          <li>
+            <strong>Tokenization</strong>
+            performs one linear scan of the character stream plus a linear scan of the words, giving
+            <code>O(|T|)</code>
+            time and
+            <code>O(W)</code>
+            space.
+          </li>
+          <li>
+            <strong>Stop-word lookup</strong>
+            is
+            <code>O(1)</code>
+            per word using a hash set.
+          </li>
+          <li>
+            <strong>Counting</strong>
+            for a fixed order
+            <em>n</em>
+            visits each window once and builds a key of length
+            <code>O(n)</code>
+            , giving
+            <code>O(W &middot; n)</code>
+            time. Computing every order up to
+            <code>
+              n
+              <sub>max</sub>
+            </code>
+            is therefore
+            <code>
+              O(W &middot; n
+              <sub>max</sub>
+              <sup>2</sup>
+              )
+            </code>
+            .
+          </li>
+        </ul>
+        <p>
+          In practice
+          <code>
+            n
+            <sub>max</sub>
+          </code>
+          is small (typically &le;&nbsp;5), so the pipeline is effectively linear in the input size.
+        </p>
+      </section>
     </main>
     <!-- same footer in other pages -->
     <footer>
@@ -35,17 +523,22 @@
         <ul>
           <li>
             <a href="https://github.com/zachaa2/smart-ngrams" target="_blank">
-              <i data-lucide="code-2"></i>Source
+              <i data-lucide="code-2"></i>
+              Source
             </a>
           </li>
           <li>
             <a href="https://zachaa2.github.io/" target="_blank">
-              <i data-lucide="globe"></i>Website
+              <i data-lucide="globe"></i>
+              Website
             </a>
           </li>
         </ul>
       </nav>
     </footer>
-    <script>lucide.createIcons()</script>
+    <script>
+      lucide.createIcons();
+
+    </script>
   </body>
 </html>

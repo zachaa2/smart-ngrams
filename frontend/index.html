@@ -3,10 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <!-- pico.css stylesheet -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
-    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
     <!-- custom stylesheet -->
     <link rel="stylesheet" href="/src/style.css" />
     <!-- lucide icons -->
@@ -30,33 +27,30 @@
       <!-- ngrams input -->
       <section id="input-section">
         <h2>Input Text</h2>
-        <textarea
-          id="input-textarea"
-          placeholder="Paste your text here..."
-          rows="10"
-        ></textarea>
+        <textarea id="input-textarea" placeholder="Paste your text here..." rows="10"></textarea>
       </section>
       <!-- ngrams settings -->
       <section id="settings-section">
-        <h2>Configure Levels</h2>  
+        <h2>Configure Levels</h2>
         <div id="levels">
           <!-- levels rows rendered by JS -->
         </div>
       </section>
       <!-- buttons -->
-       <div class="btn-row">
+      <div class="btn-row">
         <button id="add-level-btn" class="secondary outline">
-          <i data-lucide="plus"></i>Add Level
+          <i data-lucide="plus"></i>
+          Add Level
         </button>
         <button id="run-btn" disabled>Analyze</button>
-       </div>
+      </div>
       <!-- results -->
       <section id="results-section" class="results-section">
         <article>
           <h3>Results</h3>
           <div id="results">
             <!-- results rendered by JS -->
-             <span>Click "Analyze" to compute ngrams. Results will show up here</span>
+            <span>Click "Analyze" to compute ngrams. Results will show up here</span>
           </div>
         </article>
       </section>
@@ -67,12 +61,14 @@
         <ul>
           <li>
             <a href="https://github.com/zachaa2/smart-ngrams" target="_blank">
-              <i data-lucide="code-2"></i>Source
+              <i data-lucide="code-2"></i>
+              Source
             </a>
           </li>
           <li>
             <a href="https://zachaa2.github.io/" target="_blank">
-              <i data-lucide="globe"></i>Website
+              <i data-lucide="globe"></i>
+              Website
             </a>
           </li>
         </ul>
@@ -82,6 +78,7 @@
     <script type="module" src="/src/main.js"></script>
     <script>
       lucide.createIcons();
+
     </script>
   </body>
 </html>
