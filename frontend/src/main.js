@@ -115,3 +115,10 @@ DEFAULT_LEVELS.forEach((level) => addLevelRow(level.n, level.topN));
 document
   .getElementById("add-level-btn")
   .addEventListener("click", () => addLevelRow(1, 10));
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));   
+
+while (true){
+  console.log(document.getElementById("input-selector").value)
+  await sleep(5000)
+}
