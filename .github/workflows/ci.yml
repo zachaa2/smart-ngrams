@@ -1,26 +1,34 @@
-name: Deploy to GitHub Pages
+name: CI
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
-    paths:
-       - 'frontend/**'
-       - 'internal/**'
-       - 'wasm/**'
-       - 'go.mod'
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
-  build:
+  test-go:
+    name: Go tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Go vet
+        run: go vet ./...
+
+      - name: Go tests
+        run: go test ./...
+
+      - name: Build WASM binary
+        run: GOOS=js GOARCH=wasm go build -o /tmp/main.wasm ./wasm/
+
+  build-frontend:
+    name: Frontend build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -50,19 +58,3 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         run: npm run build
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: frontend/dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
