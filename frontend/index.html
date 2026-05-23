@@ -26,8 +26,26 @@
     <main class="container">
       <!-- ngrams input -->
       <section id="input-section">
-        <h2>Input Text</h2>
-        <textarea id="input-textarea" placeholder="Paste your text here..." rows="10"></textarea>
+        <div id="input-header" class="input-header">
+          <h2 style="margin-bottom: 1rem;">Input Text</h2>
+          <select id="input-selector" name="input-selector" class="input-selector" aria-label="Select the input type..." required>
+            <option selected value="text">
+              Text
+            </option>
+            <option value="file">
+              File
+            </option>
+          </select>
+        </div>
+        <div id="input-content" class="input-content">
+          <textarea id="input-textarea" placeholder="Paste your text here..." rows="10"></textarea>
+          <div id="dropzone" class="dropzone" hidden>
+            <i class="dropzone-icon" data-lucide="cloud-upload"></i>
+            Drop files or click here to select txt files to upload
+            <p id="dropzone-feedback" class="dropzone-feedback" role="status">Accepted file types: .txt, .md, .log</p>
+            <input type="file" name="files" class="dropzone-input" accept=".txt,.md,.log,text/plain"/>
+          </div>
+        </div>
       </section>
       <!-- ngrams settings -->
       <section id="settings-section">
