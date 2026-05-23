@@ -42,7 +42,8 @@
           <div id="dropzone" class="dropzone" hidden>
             <i class="dropzone-icon" data-lucide="cloud-upload"></i>
             Drop files or click here to select txt files to upload
-            <input type="file" name="files" class="dropzone-input" accept="text/plain"/>
+            <p id="dropzone-feedback" class="dropzone-feedback" role="status">Accepted file types: .txt, .md, .log</p>
+            <input type="file" name="files" class="dropzone-input" accept=".txt,.md,.log,text/plain"/>
           </div>
         </div>
       </section>

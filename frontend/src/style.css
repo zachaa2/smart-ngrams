@@ -71,6 +71,24 @@ footer svg,
   display: none;
 }
 
+.dropzone > * {
+  pointer-events: none;
+}
+
+.dropzone-feedback {
+  margin: 1rem 0 0;
+  font-size: 0.875rem;
+  color: var(--pico-muted-color);
+}
+
+.dropzone-feedback.error {
+  color: var(--pico-del-color);
+}
+
+.dropzone-feedback.success {
+  color: var(--pico-ins-color);
+}
+
 
 .level-row {
   display: flex;
