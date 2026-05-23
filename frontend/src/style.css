@@ -43,6 +43,12 @@ footer svg,
   font-size: 1.0rem;
   transition: 0.25s background-color ease-in-out;
   cursor: pointer;
+  /* height to match the textarea */
+  height: calc( 
+    10lh
+    + 2 * var(--pico-form-element-spacing-vertical)
+    + 2 * var(--pico-border-width)
+  );
 
   &:hover,
   &.dropzone-dragging {

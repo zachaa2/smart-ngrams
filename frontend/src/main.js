@@ -4,6 +4,7 @@
 /** @typedef {{ stats: Object.<string,NgramStats>, result: Object.<string,NgramEntry[]> }} NgramResult */
 /** @typedef {{ n: number, topN: number }} LevelConfig */
 
+// default config
 const DEFAULT_LEVELS = [
   { n: 1, topN: 32 },
   { n: 2, topN: 16 },
@@ -96,6 +97,34 @@ function renderResults(result, levels) {
   });
 }
 
+// dropzone logic
+const dropzone = document.getElementById("dropzone");
+const fileInput = dropzone.querySelector(".dropzone-input")
+
+dropzone.addEventListener("click", () => fileInput.click())
+
+fileInput.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  document.getElementById("input-textarea").value = text;
+  e.target.value = "";
+})
+
+// input selector logic
+const inputSelector = document.getElementById("input-selector");
+const textarea = document.getElementById("input-textarea");
+
+inputSelector.addEventListener("change", (e) => {
+  if (e.target.value === "text") {
+    dropzone.hidden = true
+    textarea.hidden = false
+  } else {
+    dropzone.hidden = false
+    textarea.hidden = true
+  }
+})
+
 // event listener for the run btn
 document.getElementById("run-btn").addEventListener("click", () => {
   const text = document.getElementById("input-textarea").value;
@@ -115,10 +144,3 @@ DEFAULT_LEVELS.forEach((level) => addLevelRow(level.n, level.topN));
 document
   .getElementById("add-level-btn")
   .addEventListener("click", () => addLevelRow(1, 10));
-
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));   
-
-while (true){
-  console.log(document.getElementById("input-selector").value)
-  await sleep(5000)
-}
