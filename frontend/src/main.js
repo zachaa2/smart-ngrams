@@ -167,6 +167,10 @@ const inputSelector = document.getElementById('input-selector')
 const textarea = document.getElementById('input-textarea')
 
 inputSelector.addEventListener('change', (e) => {
+    // cleanup any existing UI state
+    textarea.value = ''
+    setFeedback(DEFAULT_FEEDBACK)
+
     if (e.target.value === 'text') {
         dropzone.hidden = true
         textarea.hidden = false
